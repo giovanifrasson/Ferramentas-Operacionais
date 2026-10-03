@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ferramentas Operacionais</title>
+  <meta name="description" content="Ajuste de inventário, conversão de PDF para Markdown e atualização do RICMS-SC.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231f5fbf'/%3E%3Cpath d='M9 22V10h6a4 4 0 0 1 0 8h-6M19 22l4-6' stroke='%23fff' stroke-width='2.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar" aria-label="Menu lateral">
+    <div class="brand">
+      <strong>Ferramentas Operacionais</strong>
+      <span>Frasson</span>
+    </div>
+    <nav class="nav">
+      <a href="#inventario" data-view="inventario"><span class="ico">XLS</span><span>Ajuste de Inventário<small>Reescala valores até o total desejado</small></span></a>
+      <a href="#pdf" data-view="pdf"><span class="ico">PDF</span><span>PDF para Markdown<small>Converte PDFs em arquivos .md</small></span></a>
+      <a href="#ricms" data-view="ricms"><span class="ico">SC</span><span>RICMS-SC<small>Atualização via GitHub Actions</small></span></a>
+    </nav>
+    <div class="sidebar-foot">Os arquivos são processados no seu navegador e não são enviados a nenhum servidor.</div>
+  </aside>
+  <div class="scrim" id="scrim"></div>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-btn" id="menuBtn" aria-label="Abrir menu" aria-controls="sidebar">☰</button>
+      <strong id="topTitle">Ferramentas Operacionais</strong>
+    </header>
+
+    <main class="content">
+
+      <!-- ===================== AJUSTE DE INVENTARIO ===================== -->
+      <section class="view" id="view-inventario" hidden>
+        <h1 class="page-title">Ajuste de Inventário</h1>
+        <p class="page-sub">Localiza as colunas QTD., Vlr Unit. e Vlr.Total do relatório, reescala os valores unitários até o total desejado e gera uma planilha limpa, sem mesclagens.</p>
+
+        <div class="card">
+          <div class="field">
+            <span class="label">Arquivo Excel (.xls / .xlsx / .xlsm)</span>
+            <div class="drop" id="inv-drop" tabindex="0" role="button" aria-label="Selecionar arquivo Excel">
+              <strong>Arraste o arquivo aqui ou clique para escolher</strong>
+              <span id="inv-picked" class="picked">Nenhum arquivo selecionado</span>
+            </div>
+            <input type="file" id="inv-file" accept=".xls,.xlsx,.xlsm" hidden>
+          </div>
+          <div class="row">
+            <div class="field">
+              <label for="inv-comp">Competência</label>
+              <input type="text" id="inv-comp" autocomplete="off" placeholder="MM/aaaa">
+              <div class="hint">Vai na primeira linha da planilha. Deixe em branco para omitir.</div>
+            </div>
+            <div class="field">
+              <label for="inv-target">Valor total desejado</label>
+              <input type="text" id="inv-target" inputmode="decimal" autocomplete="off" placeholder="Ex.: 1.234.567,89">
+              <div class="hint" id="inv-target-hint">Informe o valor que o inventário deve somar.</div>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn primary" id="inv-run" type="button">Gerar Excel Ajustado</button>
+          </div>
+          <div class="progress" id="inv-progress" hidden>
+            <div class="progress-head"><span>Andamento</span><span id="inv-pct">0%</span></div>
+            <div class="bar"><i id="inv-bar"></i></div>
+          </div>
+          <div class="status" id="inv-status" role="status" aria-live="polite">Selecione o arquivo de inventário.</div>
+        </div>
+
+        <div class="card" id="inv-result" hidden>
+          <h2>Resultado</h2>
+          <div class="kpis" id="inv-kpis"></div>
+          <div class="actions" style="margin-bottom:14px">
+            <button class="btn primary" id="inv-download" type="button">Baixar novamente</button>
+            <span class="note" id="inv-filename"></span>
+          </div>
+          <div class="table-wrap"><table class="grid" id="inv-preview"></table></div>
+          <p class="note" id="inv-preview-note"></p>
+        </div>
+      </section>
+
+      <!-- ===================== PDF PARA MARKDOWN ===================== -->
+      <section class="view" id="view-pdf" hidden>
+        <h1 class="page-title">PDF para Markdown</h1>
+        <p class="page-sub">Extrai o texto de PDFs com pdf.js e monta títulos, listas e ênfases a partir do tamanho e do estilo da fonte. PDFs escaneados (sem texto) não são reconhecidos.</p>
+
+        <div class="card">
+          <div class="field">
+            <span class="label">Arquivos PDF</span>
+            <div class="drop" id="pdf-drop" tabindex="0" role="button" aria-label="Selecionar arquivos PDF">
+              <strong>Arraste os PDFs aqui ou clique para escolher</strong>
+              <span>Você pode selecionar vários arquivos</span>
+            </div>
+            <input type="file" id="pdf-file" accept=".pdf,application/pdf" multiple hidden>
+            <ul class="files" id="pdf-list"></ul>
+          </div>
+          <div class="field">
+            <label class="check"><input type="checkbox" id="pdf-sep" checked> Separador de página (---) entre páginas</label>
+          </div>
+          <div class="actions">
+            <button class="btn primary" id="pdf-run" type="button">Converter PDFs</button>
+            <button class="btn" id="pdf-clear" type="button">Limpar lista</button>
+          </div>
+          <div class="progress" id="pdf-progress" hidden>
+            <div class="progress-head"><span>Andamento</span><span id="pdf-pct">0%</span></div>
+            <div class="bar"><i id="pdf-bar"></i></div>
+          </div>
+          <div class="status" id="pdf-status" role="status" aria-live="polite">Adicione arquivos PDF para converter.</div>
+        </div>
+
+        <div class="card" id="pdf-result" hidden>
+          <h2>Resultado</h2>
+          <div class="actions" style="margin-bottom:14px">
+            <button class="btn primary" id="pdf-save-folder" type="button">Salvar em uma pasta…</button>
+            <button class="btn" id="pdf-save-zip" type="button">Baixar tudo (.zip)</button>
+          </div>
+          <div class="field">
+            <label for="pdf-preview-sel">Pré-visualização</label>
+            <select id="pdf-preview-sel"></select>
+          </div>
+          <pre class="md" id="pdf-preview" tabindex="0"></pre>
+        </div>
+      </section>
+
+      <!-- ===================== RICMS-SC ===================== -->
+      <section class="view" id="view-ricms" hidden>
+        <h1 class="page-title">RICMS-SC para Markdown</h1>
+        <p class="page-sub">A atualização roda no GitHub Actions: o workflow executa o script <code>RICMS-SC-para-Markdown.ps1</code> com PowerShell (pwsh) e poppler, baixa o regulamento e os anexos da SEF/SC e grava os <code>.md</code> no repositório de destino.</p>
+
+        <div class="card">
+          <h2>Executar</h2>
+          <div class="actions">
+            <a class="btn primary" id="ricms-run" href="#" target="_blank" rel="noopener">Abrir workflow no GitHub</a>
+            <button class="btn" id="ricms-refresh" type="button">Atualizar histórico</button>
+          </div>
+          <p class="note" style="margin-top:12px">No GitHub, use <b>Run workflow</b> (e escolha os documentos, se quiser). A execução leva alguns minutos.</p>
+        </div>
+
+        <div class="card">
+          <h2>Últimas execuções</h2>
+          <div id="ricms-runs" class="note">Carregando…</div>
+        </div>
+
+        <div class="card">
+          <h2>Documentos convertidos</h2>
+          <ul class="docs" id="ricms-docs"></ul>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

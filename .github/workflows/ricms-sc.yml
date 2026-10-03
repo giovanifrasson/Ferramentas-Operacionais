@@ -65,14 +65,15 @@ jobs:
           ./ricms-sc/RICMS-SC-para-Markdown.ps1 -Headless -Destino $saida -Only $only
           exit $LASTEXITCODE
 
-      - name: DEBUG comparar cBenef com o publicado
+      - name: DEBUG posicoes
         shell: bash
         run: |
-          curl -sSL -o /tmp/pub.md https://raw.githubusercontent.com/giovanifrasson/Base_Dados/main/SKILL/ICMS_SC/Legislacao/RICMS_SC_cBenef.md
-          sed '/^> Baixado em/d' /tmp/pub.md > /tmp/a.md
-          sed '/^> Baixado em/d' saida/RICMS_SC_cBenef.md > /tmp/b.md || true
-          wc -l /tmp/a.md /tmp/b.md
-          diff --strip-trailing-cr /tmp/a.md /tmp/b.md | head -30 | cut -c1-300 || true
+          curl -sSL -A 'Mozilla/5.0' -o /tmp/cb.pdf https://www.sef.sc.gov.br/api-portal/Documento/ver/1188
+          pdftotext -enc UTF-8 -layout /tmp/cb.pdf /tmp/cb.txt
+          awk '/Legisla/ && !h {print "header: Legisla@" index($0,"Legisla") " CST90@" index($0,"CST 90") " Codigo@" index($0,"digo do benef") " VigIni@" index($0,"Vig"); h=1}' /tmp/cb.txt
+          grep -n 'RICMS/SC-01' /tmp/cb.txt | head -5 | awk -F: '{print "linha " $1}'
+          grep 'RICMS/SC-01' /tmp/cb.txt | head -6 | awk '{print "RICMS@" index($0,"RICMS/SC-01") " SC8@" index($0,"SC8")}'
+          grep -E 'Art\. 15, (III|IV)' /tmp/cb.txt | head -3 | awk '{print "Anexo@" index($0,"Anexo 2") " SC8@" index($0,"SC8")}'
 
       - name: Guardar arquivos gerados
         uses: actions/upload-artifact@v4

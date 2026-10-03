@@ -130,8 +130,31 @@
 
         <div class="card">
           <h2>Atualização</h2>
-          <p style="margin-top:0">O RICMS-SC é atualizado <b>automaticamente toda segunda-feira, às 08:00</b>, sem precisar clicar em nada, e grava as mudanças no repositório Base_Dados. Acompanhe abaixo em "Últimas execuções". Para atualizar fora desse dia, peça a atualização ao Claude.</p>
-          <div class="actions" style="margin-top:14px"><button class="btn" id="ricms-refresh" type="button">Atualizar histórico</button> <a class="btn" id="ricms-open" href="#" target="_blank" rel="noopener">Ver no GitHub</a></div>
+          <p style="margin-top:0">O RICMS-SC é atualizado <b>automaticamente toda segunda-feira, às 08:00</b>, sem precisar clicar em nada. Acompanhe abaixo em "Últimas execuções".</p>
+          <details>
+            <summary><b>Executar agora (avançado)</b></summary>
+            <div style="margin-top:14px">
+              <div class="field">
+                <label class="check"><input type="checkbox" id="ricms-publish" checked> Publicar no repositório Base_Dados</label>
+              </div>
+              <div class="field" id="ricms-token-box">
+                <label for="ricms-token">Token do GitHub (só neste navegador)</label>
+                <input type="password" id="ricms-token" autocomplete="off" placeholder="github_pat_...">
+                <div class="hint">Uma página pública não consegue iniciar o GitHub sem uma credencial sua. Crie em <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHub › Fine-grained tokens</a>: repositório <b>Ferramentas-Operacionais</b>, permissão <b>Actions: Read and write</b>.</div>
+              </div>
+              <div class="actions">
+                <button class="btn primary" id="ricms-run" type="button">Executar agora</button>
+                <button class="btn" id="ricms-forget" type="button" hidden>Esquecer token</button>
+                <a class="btn" id="ricms-open" href="#" target="_blank" rel="noopener">Ver no GitHub</a>
+              </div>
+              <div class="progress" id="ricms-progress" hidden>
+                <div class="progress-head"><span id="ricms-step">Aguardando...</span><span id="ricms-pct">0%</span></div>
+                <div class="bar"><i id="ricms-bar"></i></div>
+              </div>
+              <div class="status" id="ricms-status" role="status" aria-live="polite">Pronto para executar.</div>
+            </div>
+          </details>
+          <div class="actions" style="margin-top:14px"><button class="btn" id="ricms-refresh" type="button">Atualizar histórico</button></div>
         </div>
 
         <div class="card">

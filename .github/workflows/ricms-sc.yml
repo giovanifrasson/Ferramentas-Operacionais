@@ -98,7 +98,8 @@ jobs:
 
       - name: Aviso sem token
         if: env.HAS_TOKEN != 'true' && inputs.publicar
-        run: echo "::notice::Secret BASE_DADOS_TOKEN não configurado: os .md ficaram só no artefato 'ricms-sc-markdown'."
+        run: |
+          echo "::notice::Secret BASE_DADOS_TOKEN nao configurado - os .md ficaram so no artefato ricms-sc-markdown."
 
       - name: Falhar se a conversão teve erro
         if: steps.conv.outcome == 'failure'

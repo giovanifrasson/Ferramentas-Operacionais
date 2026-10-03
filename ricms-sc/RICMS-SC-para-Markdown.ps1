@@ -327,6 +327,10 @@ function Convert-CbenefPdfToMarkdown([string]$PdfPath, [string]$Url) {
 
     $txtPath = [System.IO.Path]::ChangeExtension($PdfPath, '.txt')
     & $pdftotext -enc UTF-8 -table $PdfPath $txtPath 2>&1 | Out-Null
+    if (-not (Test-Path $txtPath)) {
+        # poppler nao tem -table (so o xpdf do Git for Windows tem): -layout mantem as colunas alinhadas
+        & $pdftotext -enc UTF-8 -layout $PdfPath $txtPath 2>&1 | Out-Null
+    }
     if (-not (Test-Path $txtPath)) { throw 'Falha ao extrair texto do PDF (pdftotext).' }
     $txt = [System.IO.File]::ReadAllText($txtPath, [System.Text.Encoding]::UTF8)
     Remove-Item $txtPath -Force -ErrorAction SilentlyContinue

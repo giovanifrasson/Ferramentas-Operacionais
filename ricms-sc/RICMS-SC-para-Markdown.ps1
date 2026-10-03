@@ -327,9 +327,11 @@ function Convert-CbenefPdfToMarkdown([string]$PdfPath, [string]$Url) {
 
     $txtPath = [System.IO.Path]::ChangeExtension($PdfPath, '.txt')
     & $pdftotext -enc UTF-8 -table $PdfPath $txtPath 2>&1 | Out-Null
+    $usouLayout = $false
     if (-not (Test-Path $txtPath)) {
         # poppler nao tem -table (so o xpdf do Git for Windows tem): -layout mantem as colunas alinhadas
         & $pdftotext -enc UTF-8 -layout $PdfPath $txtPath 2>&1 | Out-Null
+        $usouLayout = $true
     }
     if (-not (Test-Path $txtPath)) { throw 'Falha ao extrair texto do PDF (pdftotext).' }
     $txt = [System.IO.File]::ReadAllText($txtPath, [System.Text.Encoding]::UTF8)
@@ -364,6 +366,8 @@ function Convert-CbenefPdfToMarkdown([string]$PdfPath, [string]$Url) {
         $fpos = [regex]::Match($h, 'Vig.ncia\s+Fim').Index
         $cpos = @{}
         foreach ($c in $cstNames) { $cpos[$c] = [regex]::Match($h, "CST\s+$c").Index }
+        # no -layout do poppler o texto da legislacao comeca ~12 colunas antes do titulo da coluna
+        $lstart = if ($usouLayout -and $cpos['90'] -gt 0) { [Math]::Min($lpos, $cpos['90'] + 8) } else { $lpos }
         if ($dpos -lt 0 -or $spos -lt 0 -or $lpos -lt 0 -or $kpos -le 0 -or $vpos -le 0 -or $fpos -le 0) { continue }
         for ($i = $hi + 1; $i -lt $ls.Count; $i++) {
             $l = $ls[$i]
@@ -379,7 +383,7 @@ function Convert-CbenefPdfToMarkdown([string]$PdfPath, [string]$Url) {
                 Desc    = ($l.Substring($dpos, $spos - $dpos).Trim() -replace '\s+', ' ')
                 Simples = $l.Substring($spos, $cpos['00'] - 2 - $spos).Trim()
                 Csts    = $csts
-                Leg     = $l.Substring($lpos, $kpos - $lpos).Trim()
+                Leg     = $l.Substring($lstart, $kpos - $lstart).Trim()
                 Code    = $l.Substring($kpos, $vpos - $kpos).Trim()
                 Vi      = $l.Substring($vpos, $fpos - $vpos).Trim()
                 Vf      = $l.Substring($fpos).Trim()

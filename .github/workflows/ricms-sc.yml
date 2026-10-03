@@ -65,15 +65,6 @@ jobs:
           ./ricms-sc/RICMS-SC-para-Markdown.ps1 -Headless -Destino $saida -Only $only
           exit $LASTEXITCODE
 
-      - name: DEBUG posicoes
-        shell: bash
-        run: |
-          curl -sSL -A 'Mozilla/5.0' -o /tmp/cb.pdf https://www.sef.sc.gov.br/api-portal/Documento/ver/1188
-          pdftotext -enc UTF-8 -layout /tmp/cb.pdf /tmp/cb.txt
-          awk '/Legisla/ && !h {print "header: Legisla@" index($0,"Legisla") " CST90@" index($0,"CST 90") " Codigo@" index($0,"digo do benef") " VigIni@" index($0,"Vig"); h=1}' /tmp/cb.txt
-          awk '/RICMS\/SC-01/ && n<6 {n++; print "RICMS@" index($0,"RICMS/SC-01") " SC8@" index($0,"SC8")}' /tmp/cb.txt
-          awk '/Art\. 15, (III|IV)/ && m<3 {m++; print "Anexo@" index($0,"Anexo 2") " SC8@" index($0,"SC8")}' /tmp/cb.txt
-
       - name: Guardar arquivos gerados
         uses: actions/upload-artifact@v4
         with:

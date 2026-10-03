@@ -65,6 +65,47 @@
     $('ricms-forget').hidden = !has;
   }
 
+
+  // acompanha a execucao: acha a rodada recem-criada e mostra etapas concluidas / total
+  async function track(token, since) {
+    const st = $('ricms-status');
+    const api = path => fetch('https://api.github.com/repos/' + CONFIG.repo + path, { headers: { Accept: 'application/vnd.github+json', Authorization: 'Bearer ' + token } }).then(r => r.json());
+    const setBar = (pct, step) => { $('ricms-progress').hidden = false; $('ricms-bar').style.width = pct + '%'; $('ricms-pct').textContent = pct + '%'; $('ricms-step').textContent = step; };
+    setBar(2, 'Workflow na fila...');
+    window.UI.setStatus(st, 'Workflow iniciado. Acompanhando a execução...');
+    let runId = null;
+    for (let i = 0; i < 240; i++) {
+      await new Promise(r => setTimeout(r, 4000));
+      try {
+        if (!runId) {
+          const d = await api('/actions/workflows/' + CONFIG.workflow + '/runs?event=workflow_dispatch&per_page=5');
+          const run = (d.workflow_runs || []).find(r => new Date(r.created_at).getTime() >= since);
+          if (!run) continue;
+          runId = run.id;
+        }
+        const run = await api('/actions/runs/' + runId);
+        const jobs = (await api('/actions/runs/' + runId + '/jobs')).jobs || [];
+        const steps = jobs.flatMap(j => j.steps || []).filter(s => !/^(Set up job|Complete job|Post )/.test(s.name));
+        const done = steps.filter(s => s.status === 'completed').length;
+        const cur = steps.find(s => s.status === 'in_progress');
+        const pct = steps.length ? Math.round(done / steps.length * 100) : 5;
+        if (run.status !== 'completed') {
+          setBar(Math.min(95, Math.max(pct, 5)), cur ? 'Etapa: ' + cur.name : 'Em execução...');
+          continue;
+        }
+        const ok = run.conclusion === 'success';
+        setBar(100, ok ? 'Concluído' : 'Terminou com erro');
+        window.UI.setStatus(st, ok ? 'Concluído com sucesso. ' : 'A execução terminou com ' + run.conclusion + '. ');
+        st.className = 'status ' + (ok ? 'ok' : 'err');
+        st.innerHTML += '<a href="' + esc(run.html_url) + '" target="_blank" rel="noopener">Ver detalhes e arquivos gerados</a>';
+        loadRuns();
+        return;
+      } catch (e) { /* tenta de novo no proximo ciclo */ }
+    }
+    window.UI.setStatus(st, 'Acompanhamento encerrado por tempo. Veja o histórico abaixo.', 'warn');
+    loadRuns();
+  }
+
   async function run() {
     const st = $('ricms-status');
     let token = getToken();
@@ -72,6 +113,7 @@
     if (!token && typed) { token = typed; }
     if (!token) { window.UI.setStatus(st, 'Informe o token do GitHub para executar.', 'err'); return; }
     $('ricms-run').disabled = true;
+    const started = Date.now() - 15000;
     window.UI.setStatus(st, 'Disparando o workflow...');
     try {
       const resp = await fetch('https://api.github.com/repos/' + CONFIG.repo + '/actions/workflows/' + CONFIG.workflow + '/dispatches', {
@@ -82,7 +124,7 @@
       if (resp.status === 204) {
         setToken(token); $('ricms-token').value = ''; syncTokenUi();
         window.UI.setStatus(st, 'Workflow iniciado. A execução leva alguns minutos; acompanhe no histórico abaixo.', 'ok');
-        setTimeout(loadRuns, 4000);
+        track(token, started);
       } else if (resp.status === 401 || resp.status === 403 || resp.status === 404) {
         setToken('');  syncTokenUi();
         window.UI.setStatus(st, 'O GitHub recusou o token (' + resp.status + '). Confira se ele tem acesso ao repositório ' + CONFIG.repo + ' com a permissão Actions: Read and write.', 'err');

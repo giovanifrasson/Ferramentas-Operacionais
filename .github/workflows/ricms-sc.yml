@@ -52,6 +52,19 @@ jobs:
           pdftotext -v 2>&1 | head -1
           pwsh --version
 
+      - name: DEBUG layout do cBenef
+        run: |
+          curl -sSL -A 'Mozilla/5.0' -o /tmp/cb.pdf https://www.sef.sc.gov.br/api-portal/Documento/ver/1188
+          ls -l /tmp/cb.pdf
+          pdftotext -enc UTF-8 -layout /tmp/cb.pdf /tmp/cb_layout.txt
+          pdftotext -enc UTF-8 -raw /tmp/cb.pdf /tmp/cb_raw.txt
+          echo "--- layout (pagina 1, 12 linhas, largura cortada em 400)"
+          head -12 /tmp/cb_layout.txt | cut -c1-400
+          echo "--- ocorrencias de Benef no layout"
+          grep -n 'Benef' /tmp/cb_layout.txt | head -3 | cut -c1-400
+          echo "--- layout, linhas 14-24"
+          sed -n '14,24p' /tmp/cb_layout.txt | cut -c1-400
+
       - name: Baixar e converter (pwsh)
         id: conv
         continue-on-error: true

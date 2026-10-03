@@ -353,7 +353,7 @@ function Convert-CbenefPdfToMarkdown([string]$PdfPath, [string]$Url) {
     foreach ($pg in ($txt -split "`f")) {
         $ls = $pg -split "`r?`n"
         $hi = -1
-        for ($i = 0; $i -lt $ls.Count; $i++) { if ($ls[$i].StartsWith('Benef')) { $hi = $i; break } }
+        for ($i = 0; $i -lt $ls.Count; $i++) { if ($ls[$i].TrimStart().StartsWith('Benef')) { $hi = $i; break } }
         if ($hi -lt 0) { continue }
         $h = $ls[$hi]
         $dpos = $h.IndexOf('Descri')
@@ -368,7 +368,7 @@ function Convert-CbenefPdfToMarkdown([string]$PdfPath, [string]$Url) {
         for ($i = $hi + 1; $i -lt $ls.Count; $i++) {
             $l = $ls[$i]
             if ([string]::IsNullOrWhiteSpace($l)) { continue }
-            if ($l -match '^\d\d/\d\d/\d{4} \d\d:') { continue }
+            if ($l -match '^\s*\d\d/\d\d/\d{4} \d\d:') { continue }
             if ($l -match '^\s*Nacional\s*$') { continue }
             $l = $l.PadRight($fpos + 20)
             $csts = @()

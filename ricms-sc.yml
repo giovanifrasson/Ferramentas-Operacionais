@@ -1,0 +1,107 @@
+name: RICMS-SC para Markdown
+
+# Executa ricms-sc/RICMS-SC-para-Markdown.ps1 (-Headless) com pwsh + poppler e publica os .md
+# no repositório de destino (Base_Dados). Disparo manual: Actions > RICMS-SC para Markdown > Run workflow.
+on:
+  workflow_dispatch:
+    inputs:
+      arquivos:
+        description: 'Arquivos de saída separados por vírgula (ex.: RICMS_SC_Anexo_01.md,RICMS_SC_cBenef.md). Vazio = todos.'
+        required: false
+        default: ''
+      publicar:
+        description: 'Publicar no repositório de destino (precisa do secret BASE_DADOS_TOKEN)'
+        type: boolean
+        default: true
+
+concurrency:
+  group: ricms-sc
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  TZ: America/Sao_Paulo                      # o script grava "Baixado em" com a hora local
+  DEST_REPO: giovanifrasson/Base_Dados
+  DEST_BRANCH: main
+  DEST_PATH: SKILL/ICMS_SC/Legislacao
+  HAS_TOKEN: ${{ secrets.BASE_DADOS_TOKEN != '' }}
+
+jobs:
+  ricms:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Código da ferramenta
+        uses: actions/checkout@v4
+
+      - name: Repositório de destino
+        if: env.HAS_TOKEN == 'true' && inputs.publicar
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.DEST_REPO }}
+          ref: ${{ env.DEST_BRANCH }}
+          token: ${{ secrets.BASE_DADOS_TOKEN }}
+          path: destino
+
+      - name: Instalar poppler (pdftotext)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq poppler-utils
+          pdftotext -v 2>&1 | head -1
+          pwsh --version
+
+      - name: Baixar e converter (pwsh)
+        id: conv
+        continue-on-error: true
+        shell: pwsh
+        env:
+          ARQUIVOS: ${{ inputs.arquivos }}
+        run: |
+          $only = @()
+          if ($env:ARQUIVOS) { $only = @($env:ARQUIVOS -split '[,;\s]+' | Where-Object { $_ }) }
+          $saida = Join-Path $env:GITHUB_WORKSPACE 'saida'
+          ./ricms-sc/RICMS-SC-para-Markdown.ps1 -Headless -Destino $saida -Only $only
+          exit $LASTEXITCODE
+
+      - name: Guardar arquivos gerados
+        uses: actions/upload-artifact@v4
+        with:
+          name: ricms-sc-markdown
+          path: saida/*.md
+          if-no-files-found: warn
+
+      - name: Copiar para o repositório de destino
+        if: env.HAS_TOKEN == 'true' && inputs.publicar
+        run: |
+          mkdir -p "destino/$DEST_PATH"
+          cp saida/*.md "destino/$DEST_PATH/"
+          cd destino
+          git add "$DEST_PATH"
+          # a linha "Baixado em" muda a cada execução: só mantém o arquivo se algo mais mudou
+          for f in $(git diff --cached --name-only); do
+            mudou=$(git diff --cached -I'^> Baixado em: ' --unified=0 -- "$f" | grep -E '^[+-]' | grep -vE '^(\+\+\+|---)' || true)
+            if [ -z "$mudou" ]; then
+              git restore --staged --worktree -- "$f"
+            fi
+          done
+          if git diff --cached --quiet; then
+            echo "Nenhuma alteração de conteúdo; nada a publicar."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          n=$(git diff --cached --name-only | wc -l)
+          git commit -m "Atualiza RICMS-SC: ${n} arquivo(s) – $(date '+%d/%m/%Y %H:%M')"
+          git push origin "HEAD:${DEST_BRANCH}"
+
+      - name: Aviso sem token
+        if: env.HAS_TOKEN != 'true' && inputs.publicar
+        run: echo "::notice::Secret BASE_DADOS_TOKEN não configurado: os .md ficaram só no artefato 'ricms-sc-markdown'."
+
+      - name: Falhar se a conversão teve erro
+        if: steps.conv.outcome == 'failure'
+        run: |
+          echo "::error::A conversão terminou com erro (veja o passo 'Baixar e converter')."
+          exit 1

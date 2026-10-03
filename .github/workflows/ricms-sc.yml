@@ -3,6 +3,8 @@ name: RICMS-SC para Markdown
 # Executa ricms-sc/RICMS-SC-para-Markdown.ps1 (-Headless) com pwsh + poppler e publica os .md
 # no repositório de destino (Base_Dados). Disparo manual: Actions > RICMS-SC para Markdown > Run workflow.
 on:
+  schedule:
+    - cron: '0 11 * * 1'   # toda segunda-feira, 08:00 em Brasilia
   workflow_dispatch:
     inputs:
       arquivos:
@@ -37,7 +39,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Repositório de destino
-        if: env.HAS_TOKEN == 'true' && inputs.publicar
+        if: env.HAS_TOKEN == 'true' && (github.event_name == 'schedule' || inputs.publicar)
         uses: actions/checkout@v4
         with:
           repository: ${{ env.DEST_REPO }}
@@ -73,7 +75,7 @@ jobs:
           if-no-files-found: warn
 
       - name: Copiar para o repositório de destino
-        if: env.HAS_TOKEN == 'true' && inputs.publicar
+        if: env.HAS_TOKEN == 'true' && (github.event_name == 'schedule' || inputs.publicar)
         run: |
           mkdir -p "destino/$DEST_PATH"
           cp saida/*.md "destino/$DEST_PATH/"
@@ -97,7 +99,7 @@ jobs:
           git push origin "HEAD:${DEST_BRANCH}"
 
       - name: Aviso sem token
-        if: env.HAS_TOKEN != 'true' && inputs.publicar
+        if: env.HAS_TOKEN != 'true' && (github.event_name == 'schedule' || inputs.publicar)
         run: |
           echo "::notice::Secret BASE_DADOS_TOKEN nao configurado - os .md ficaram so no artefato ricms-sc-markdown."
 

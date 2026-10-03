@@ -129,23 +129,28 @@
         <p class="page-sub">A atualização roda no GitHub Actions: o workflow executa o script <code>RICMS-SC-para-Markdown.ps1</code> com PowerShell (pwsh) e poppler, baixa o regulamento e os anexos da SEF/SC e grava os <code>.md</code> no repositório de destino.</p>
 
         <div class="card">
-          <h2>Executar</h2>
-          <div class="field">
-            <label class="check"><input type="checkbox" id="ricms-publish" checked> Publicar no repositório Base_Dados</label>
-            <div class="hint">Desmarcado, os arquivos ficam só como download da execução no GitHub.</div>
-          </div>
-          <div class="field" id="ricms-token-box">
-            <label for="ricms-token">Token do GitHub (só neste navegador)</label>
-            <input type="password" id="ricms-token" autocomplete="off" placeholder="github_pat_...">
-            <div class="hint">Necessário uma vez. Crie em <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHub › Fine-grained tokens</a>: repositório <b>Ferramentas-Operacionais</b> apenas, permissão <b>Actions: Read and write</b>. Fica salvo neste navegador; use "Esquecer token" para apagar.</div>
-          </div>
-          <div class="actions">
-            <button class="btn primary" id="ricms-run" type="button">Executar agora</button>
-            <button class="btn" id="ricms-forget" type="button" hidden>Esquecer token</button>
-            <button class="btn" id="ricms-refresh" type="button">Atualizar histórico</button>
-            <a class="btn" id="ricms-open" href="#" target="_blank" rel="noopener">Ver no GitHub</a>
-          </div>
-          <div class="status" id="ricms-status" role="status" aria-live="polite">Pronto para executar.</div>
+          <h2>Atualização</h2>
+          <p style="margin-top:0">O RICMS-SC é atualizado <b>automaticamente toda segunda-feira, às 08:00</b>, sem precisar clicar em nada. Acompanhe abaixo em "Últimas execuções".</p>
+          <details>
+            <summary><b>Executar agora (avançado)</b></summary>
+            <div style="margin-top:14px">
+              <div class="field">
+                <label class="check"><input type="checkbox" id="ricms-publish" checked> Publicar no repositório Base_Dados</label>
+              </div>
+              <div class="field" id="ricms-token-box">
+                <label for="ricms-token">Token do GitHub (só neste navegador)</label>
+                <input type="password" id="ricms-token" autocomplete="off" placeholder="github_pat_...">
+                <div class="hint">Uma página pública não consegue iniciar o GitHub sem uma credencial sua. Crie em <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHub › Fine-grained tokens</a>: repositório <b>Ferramentas-Operacionais</b>, permissão <b>Actions: Read and write</b>.</div>
+              </div>
+              <div class="actions">
+                <button class="btn primary" id="ricms-run" type="button">Executar agora</button>
+                <button class="btn" id="ricms-forget" type="button" hidden>Esquecer token</button>
+                <a class="btn" id="ricms-open" href="#" target="_blank" rel="noopener">Ver no GitHub</a>
+              </div>
+              <div class="status" id="ricms-status" role="status" aria-live="polite">Pronto para executar.</div>
+            </div>
+          </details>
+          <div class="actions" style="margin-top:14px"><button class="btn" id="ricms-refresh" type="button">Atualizar histórico</button></div>
         </div>
 
         <div class="card">

@@ -55,11 +55,56 @@
     }
   }
 
+  const TOKEN_KEY = 'ricms_gh_token';
+  const getToken = () => { try { return localStorage.getItem(TOKEN_KEY) || ''; } catch (e) { return ''; } };
+  const setToken = t => { try { if (t) localStorage.setItem(TOKEN_KEY, t); else localStorage.removeItem(TOKEN_KEY); } catch (e) { /* sem armazenamento */ } };
+
+  function syncTokenUi() {
+    const has = !!getToken();
+    $('ricms-token-box').hidden = has;
+    $('ricms-forget').hidden = !has;
+  }
+
+  async function run() {
+    const st = $('ricms-status');
+    let token = getToken();
+    const typed = $('ricms-token').value.trim();
+    if (!token && typed) { token = typed; }
+    if (!token) { window.UI.setStatus(st, 'Informe o token do GitHub para executar.', 'err'); return; }
+    $('ricms-run').disabled = true;
+    window.UI.setStatus(st, 'Disparando o workflow...');
+    try {
+      const resp = await fetch('https://api.github.com/repos/' + CONFIG.repo + '/actions/workflows/' + CONFIG.workflow + '/dispatches', {
+        method: 'POST',
+        headers: { Accept: 'application/vnd.github+json', Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ref: 'main', inputs: { publicar: $('ricms-publish').checked ? 'true' : 'false' } })
+      });
+      if (resp.status === 204) {
+        setToken(token); $('ricms-token').value = ''; syncTokenUi();
+        window.UI.setStatus(st, 'Workflow iniciado. A execução leva alguns minutos; acompanhe no histórico abaixo.', 'ok');
+        setTimeout(loadRuns, 4000);
+      } else if (resp.status === 401 || resp.status === 403 || resp.status === 404) {
+        setToken('');  syncTokenUi();
+        window.UI.setStatus(st, 'O GitHub recusou o token (' + resp.status + '). Confira se ele tem acesso ao repositório ' + CONFIG.repo + ' com a permissão Actions: Read and write.', 'err');
+      } else {
+        const body = await resp.text();
+        window.UI.setStatus(st, 'Erro ' + resp.status + ' ao disparar: ' + body.slice(0, 200), 'err');
+      }
+    } catch (e) {
+      window.UI.setStatus(st, 'Não foi possível falar com o GitHub: ' + e.message, 'err');
+    } finally {
+      $('ricms-run').disabled = false;
+    }
+  }
+
   window.Tools.ricms = {
     init() {
-      $('ricms-run').href = 'https://github.com/' + CONFIG.repo + '/actions/workflows/' + CONFIG.workflow;
+      $('ricms-open').href = 'https://github.com/' + CONFIG.repo + '/actions/workflows/' + CONFIG.workflow;
       $('ricms-docs').innerHTML = DOCS.map(([nome, arq]) => '<li>' + esc(nome) + '<br><code>' + esc(arq) + '</code></li>').join('');
       $('ricms-refresh').addEventListener('click', loadRuns);
+      $('ricms-run').addEventListener('click', run);
+      $('ricms-forget').addEventListener('click', () => { setToken(''); syncTokenUi(); window.UI.setStatus($('ricms-status'), 'Token apagado deste navegador.'); });
+      syncTokenUi();
       loadRuns();
     }
   };

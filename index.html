@@ -130,11 +130,22 @@
 
         <div class="card">
           <h2>Executar</h2>
-          <div class="actions">
-            <a class="btn primary" id="ricms-run" href="#" target="_blank" rel="noopener">Abrir workflow no GitHub</a>
-            <button class="btn" id="ricms-refresh" type="button">Atualizar histórico</button>
+          <div class="field">
+            <label class="check"><input type="checkbox" id="ricms-publish" checked> Publicar no repositório Base_Dados</label>
+            <div class="hint">Desmarcado, os arquivos ficam só como download da execução no GitHub.</div>
           </div>
-          <p class="note" style="margin-top:12px">No GitHub, use <b>Run workflow</b> (e escolha os documentos, se quiser). A execução leva alguns minutos.</p>
+          <div class="field" id="ricms-token-box">
+            <label for="ricms-token">Token do GitHub (só neste navegador)</label>
+            <input type="password" id="ricms-token" autocomplete="off" placeholder="github_pat_...">
+            <div class="hint">Necessário uma vez. Crie em <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHub › Fine-grained tokens</a>: repositório <b>Ferramentas-Operacionais</b> apenas, permissão <b>Actions: Read and write</b>. Fica salvo neste navegador; use "Esquecer token" para apagar.</div>
+          </div>
+          <div class="actions">
+            <button class="btn primary" id="ricms-run" type="button">Executar agora</button>
+            <button class="btn" id="ricms-forget" type="button" hidden>Esquecer token</button>
+            <button class="btn" id="ricms-refresh" type="button">Atualizar histórico</button>
+            <a class="btn" id="ricms-open" href="#" target="_blank" rel="noopener">Ver no GitHub</a>
+          </div>
+          <div class="status" id="ricms-status" role="status" aria-live="polite">Pronto para executar.</div>
         </div>
 
         <div class="card">

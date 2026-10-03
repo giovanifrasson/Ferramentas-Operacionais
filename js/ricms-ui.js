@@ -69,7 +69,7 @@
   // acompanha a execucao: acha a rodada recem-criada e mostra etapas concluidas / total
   async function track(token, since) {
     const st = $('ricms-status');
-    const api = path => fetch('https://api.github.com/repos/' + CONFIG.repo + path, { headers: { Accept: 'application/vnd.github+json', Authorization: 'Bearer ' + token } }).then(r => r.json());
+    const api = path => fetch('https://api.github.com/repos/' + CONFIG.repo + path, { headers: Object.assign({ Accept: 'application/vnd.github+json' }, token ? { Authorization: 'Bearer ' + token } : {}) }).then(r => r.json());
     const setBar = (pct, step) => { $('ricms-progress').hidden = false; $('ricms-bar').style.width = pct + '%'; $('ricms-pct').textContent = pct + '%'; $('ricms-step').textContent = step; };
     setBar(2, 'Workflow na fila...');
     window.UI.setStatus(st, 'Workflow iniciado. Acompanhando a execução...');
@@ -140,6 +140,7 @@
   }
 
   window.Tools.ricms = {
+    _track: track,
     init() {
       $('ricms-open').href = 'https://github.com/' + CONFIG.repo + '/actions/workflows/' + CONFIG.workflow;
       $('ricms-docs').innerHTML = DOCS.map(([nome, arq]) => '<li>' + esc(nome) + '<br><code>' + esc(arq) + '</code></li>').join('');

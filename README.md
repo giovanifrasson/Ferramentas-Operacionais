@@ -1,12 +1,13 @@
 # Ferramentas Operacionais
 
-Site estático (HTML, CSS e JS puro, tema claro, menu lateral) com três ferramentas portadas dos scripts PowerShell de `ferramentas/`:
+Site estático (HTML, CSS e JS puro, tema claro, menu lateral) com ferramentas portadas dos scripts PowerShell de `ferramentas/` e um atalho para a ferramenta local de NFe:
 
 | Ferramenta | Como funciona |
 |---|---|
 | **Ajuste de Inventário** | Lê com SheetJS, calcula em decimal (decimal.js) e grava com ExcelJS. Tudo no navegador. |
 | **PDF para Markdown** | Extrai texto com pdf.js e monta o Markdown. Tudo no navegador. |
 | **RICMS-SC** | GitHub Actions roda `ricms-sc/RICMS-SC-para-Markdown.ps1` (`-Headless`) com `pwsh` + poppler e publica os `.md` em `Base_Dados`. |
+| **NFe: baixar XML por chave** | Botão que abre a ferramenta local `ferramentas/NFe-Baixar-XML-por-Chave` (usa certificado digital, por isso roda no Windows). Funciona pelo atalho `frasson-nfe://`, cadastrado uma vez com `instalar-atalho-navegador.reg`. |
 
 As bibliotecas vêm do cdnjs (sem build, sem `npm`). Para ver localmente: `python -m http.server` nesta pasta e abrir `http://localhost:8000`.
 
@@ -24,6 +25,7 @@ js/app.js            navegação, carregamento sob demanda, utilidades
 js/inventario-*.js   núcleo (porte do .ps1) e tela
 js/pdfmd-*.js        núcleo (porte do .ps1) e tela;  js/zip.js  gerador de .zip
 js/ricms-ui.js       tela do RICMS-SC;  js/psnet.js  diferenças PS 5.1 × JS
+js/nfe-ui.js         botão que inicia a ferramenta local de NFe
 ricms-sc/            RICMS-SC-para-Markdown.ps1 (original + -Headless)
 .github/workflows/ricms-sc.yml
 ```

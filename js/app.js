@@ -5,7 +5,8 @@
   const VIEWS = {
     inventario: { title: 'Ajuste de Inventário', scripts: () => [CONFIG.libs.xlsx, CONFIG.libs.exceljs, CONFIG.libs.decimal, 'js/psnet.js', 'js/inventario-core.js', 'js/inventario-ui.js'] },
     pdf: { title: 'PDF para Markdown', scripts: () => [CONFIG.libs.pdfjs, 'js/psnet.js', 'js/zip.js', 'js/pdfmd-core.js', 'js/pdfmd-ui.js'] },
-    ricms: { title: 'RICMS-SC', scripts: () => ['js/ricms-ui.js'] }
+    ricms: { title: 'RICMS-SC', scripts: () => ['js/ricms-ui.js'] },
+    nfe: { title: 'NFe: baixar XML por chave', scripts: () => ['js/nfe-ui.js'] }
   };
 
   const loaded = new Map();

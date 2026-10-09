@@ -132,16 +132,21 @@
         <div class="card">
           <h2>Atualização</h2>
           <p style="margin-top:0">O RICMS-SC é atualizado <b>automaticamente toda segunda-feira, às 08:00</b>, sem precisar clicar em nada. Acompanhe abaixo em "Últimas execuções".</p>
-          <details>
-            <summary><b>Executar agora (avançado)</b></summary>
+          <details open>
+            <summary><b>Executar agora</b></summary>
             <div style="margin-top:14px">
               <div class="field">
                 <label class="check"><input type="checkbox" id="ricms-publish" checked> Publicar no repositório Base_Dados</label>
               </div>
               <div class="field" id="ricms-token-box">
-                <label for="ricms-token">Token do GitHub (só neste navegador)</label>
+                <p class="hint" style="margin-top:0"><b>Configuração única</b> (leva 1 minuto). O GitHub só deixa uma página iniciar a atualização se você der uma permissão:</p>
+                <ol class="hint" style="margin:6px 0 12px 18px;padding:0">
+                  <li>Clique em <a class="btn small" id="ricms-newtoken" href="#" target="_blank" rel="noopener">Criar token já configurado</a> (abre o GitHub com tudo preenchido).</li>
+                  <li>Em <b>Repository access</b> (Acesso ao repositório) marque <b>Only select repositories</b> (Somente repositórios selecionados) e escolha <b>Ferramentas-Operacionais</b>. Confira que <b>Actions</b> está em <b>Read and write</b>. Clique em <b>Generate token</b>.</li>
+                  <li>Copie o valor que começa com <code>github_pat_</code> e cole abaixo. Depois é só clicar em Executar agora, sem repetir.</li>
+                </ol>
+                <label for="ricms-token">Token do GitHub (fica salvo só neste navegador)</label>
                 <input type="password" id="ricms-token" autocomplete="off" placeholder="github_pat_...">
-                <div class="hint">Uma página pública não consegue iniciar o GitHub sem uma credencial sua. Crie em <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHub › Fine-grained tokens</a>: repositório <b>Ferramentas-Operacionais</b>, permissão <b>Actions: Read and write</b>.</div>
               </div>
               <div class="actions">
                 <button class="btn primary" id="ricms-run" type="button">Executar agora</button>

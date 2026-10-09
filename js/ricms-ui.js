@@ -59,7 +59,10 @@
   const getToken = () => { try { return localStorage.getItem(TOKEN_KEY) || ''; } catch (e) { return ''; } };
   const setToken = t => { try { if (t) localStorage.setItem(TOKEN_KEY, t); else localStorage.removeItem(TOKEN_KEY); } catch (e) { /* sem armazenamento */ } };
 
+  const NEW_TOKEN_URL = 'https://github.com/settings/personal-access-tokens/new?name=Executar-RICMS-SC&description=Inicia+o+workflow+RICMS-SC+pela+pagina+Ferramentas-Operacionais&target_name=' + CONFIG.repo.split('/')[0] + '&expires_in=365&actions=write';
+
   function syncTokenUi() {
+    $('ricms-newtoken').href = NEW_TOKEN_URL;
     const has = !!getToken();
     $('ricms-token-box').hidden = has;
     $('ricms-forget').hidden = !has;
@@ -127,7 +130,7 @@
         track(token, started);
       } else if (resp.status === 401 || resp.status === 403 || resp.status === 404) {
         setToken('');  syncTokenUi();
-        window.UI.setStatus(st, 'O GitHub recusou o token (' + resp.status + '). Confira se ele tem acesso ao repositório ' + CONFIG.repo + ' com a permissão Actions: Read and write.', 'err');
+        window.UI.setStatus(st, 'O GitHub recusou o token (' + resp.status + '): ele não tem a permissão Actions: Read and write no repositório ' + CONFIG.repo + '. Use "Criar token já configurado" acima, escolha o repositório Ferramentas-Operacionais e cole o novo valor.', 'err');
       } else {
         const body = await resp.text();
         window.UI.setStatus(st, 'Erro ' + resp.status + ' ao disparar: ' + body.slice(0, 200), 'err');

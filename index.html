@@ -20,6 +20,7 @@
       <a href="#pdf" data-view="pdf"><span class="ico">PDF</span><span>PDF para Markdown<small>Converte PDFs em arquivos .md</small></span></a>
       <a href="#ricms" data-view="ricms"><span class="ico">SC</span><span>RICMS-SC<small>Atualização via GitHub Actions</small></span></a>
       <a href="#nfe" data-view="nfe"><span class="ico">NFe</span><span>NFe: baixar XML por chave<small>Abre a ferramenta no Windows</small></span></a>
+      <a href="#danfe" data-view="danfe"><span class="ico">DNF</span><span>DANFE por chave<small>PDF ou XML pelo consultadanfe.com</small></span></a>
     </nav>
     <div class="sidebar-foot">Os arquivos são processados no seu navegador e não são enviados a nenhum servidor.</div>
   </aside>
@@ -191,6 +192,36 @@
           <h2>Primeira vez neste computador</h2>
           <p style="margin-top:0">Se nada abrir, falta cadastrar o atalho no Windows (uma vez só). Na pasta <code>ferramentas\NFe-Baixar-XML-por-Chave</code> dê dois cliques em <code>instalar-atalho-navegador.reg</code> e confirme. Para desfazer, use <code>remover-atalho-navegador.reg</code>.</p>
           <p class="note">Sem o atalho, abra a ferramenta pelo <code>Executar.cmd</code> da mesma pasta. A ferramenta salva os XMLs em <code>Downloads\Danfes</code>.</p>
+        </div>
+      </section>
+
+      <!-- ===================== DANFE POR CHAVE (PDF ou XML) ===================== -->
+      <section class="view" id="view-danfe" hidden>
+        <h1 class="page-title">DANFE por chave de acesso</h1>
+        <p class="page-sub">Cola as chaves de acesso (ou abre um .txt / .xlsx) e baixa o <b>PDF do DANFE</b> ou o <b>XML</b> de cada nota, consultando o consultadanfe.com. Ferramenta do Windows: ela abre o Edge ou o Chrome no seu computador e captura o arquivo que o site devolve, então este botão só abre o programa.</p>
+
+        <div class="card">
+          <h2>Iniciar</h2>
+          <div class="actions">
+            <a class="btn primary" id="danfe-start" href="frasson-danfe://iniciar">Iniciar ferramenta</a>
+          </div>
+          <div class="status" id="danfe-status" role="status" aria-live="polite">Clique em "Iniciar ferramenta". O navegador pode pedir permissão para abrir um aplicativo: aceite.</div>
+        </div>
+
+        <div class="card">
+          <h2>Como usar</h2>
+          <ol style="margin:0 0 0 18px;padding:0">
+            <li>Cole as chaves (44 dígitos, uma por linha) ou clique em <b>Abrir .txt / .xlsx</b>. Para planilha, informe a coluna da chave (padrão <b>O</b>).</li>
+            <li>Escolha <b>PDF (DANFE)</b> ou <b>XML</b> e a pasta de destino (padrão <code>Downloads\NFs</code>).</li>
+            <li>Clique em <b>Baixar</b>. Uma janela do Edge/Chrome abre e consulta cada chave; não feche essa janela até terminar.</li>
+          </ol>
+          <p class="note" style="margin-bottom:0">Ao final aparece o resumo com as chaves que deram erro. Os arquivos são nomeados como <code>DANFE_&lt;UF+ano&gt;_&lt;número&gt;_&lt;data&gt;.pdf</code> ou <code>XML_...xml</code>.</p>
+        </div>
+
+        <div class="card">
+          <h2>Primeira vez neste computador</h2>
+          <p style="margin-top:0">Se nada abrir, falta cadastrar o atalho no Windows (uma vez só). Na pasta <code>ferramentas\DANFE-por-Chave</code> dê dois cliques em <code>instalar-atalho-navegador.reg</code> e confirme. Para desfazer, use <code>remover-atalho-navegador.reg</code>.</p>
+          <p class="note" style="margin-bottom:0">Sem o atalho, abra a ferramenta pelo <code>Executar.cmd</code> da mesma pasta. Para notas que exigem o certificado digital da empresa, use a ferramenta "NFe: baixar XML por chave".</p>
         </div>
       </section>
 
